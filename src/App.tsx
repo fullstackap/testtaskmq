@@ -6,36 +6,9 @@ import Select from 'react-select'
 import { Button, Col, Row } from 'antd';
 import 'antd/dist/antd.css'
 import CanvasWrapper from './CanvasWrapper';
-import { initiateDB, PRECIPITATION_TABLE, readTableData, TEMPERATURE_TABLE, writeTableData } from './indexedDB';
-
-
-const TEMPERATURE = "Температура";
-const PRECIPITATION = "Осадки";
-
-const useStateWithCallbackLazy = (initialValue: any) => {
-    const callbackRef = useRef<any>(null);
-
-    const [value, setValue] = useState(initialValue);
-
-    useEffect(() => {
-        if (callbackRef.current) {
-            callbackRef.current(value);
-
-            callbackRef.current = null;
-        }
-    }, [value]);
-
-    const setValueWithCallback = useCallback(
-        (newValue: any, callback: any) => {
-            callbackRef.current = callback;
-
-            return setValue(newValue);
-        },
-        [],
-    );
-
-    return [value, setValueWithCallback];
-};
+import { initiateDB, readTableData, writeTableData } from './indexedDB';
+import { PRECIPITATION, PRECIPITATION_TABLE, TEMPERATURE, TEMPERATURE_TABLE } from './constants';
+import useStateWithCallback from './useStateWithCallback';
 
 const getMenuOptions = (label = "Select Year", uniqueYears: any) => [
     { label, value: "" },
@@ -59,7 +32,7 @@ function App() {
     const [selectedMinYear, setSelectedMinYear] = useState<any>('');
     const [selectedMaxYear, setSelectedMaxYear] = useState<any>('');
 
-    const [dataArr, setDataArr] = useStateWithCallbackLazy([]);
+    const [dataArr, setDataArr] = useStateWithCallback([]);
     const [uniqueYears, setUniqueYears] = useState<any>([]);
 
     const [hasCheckedForTemperatureData, setHasCheckedForTemperatureData] = useState(false);
@@ -75,88 +48,112 @@ function App() {
     const precipitationButtonRef = useRef<HTMLButtonElement>(null);
 
     const handleDisplayData = (displayDataP: any, dataArrP: any, selectedMinYearP: any, selectedMaxYearP: any) => {
-        console.error("@handleDisplayData");
+        try {
+            console.error("@handleDisplayData");
 
-        setDataArr([], () => {
-            // filter data against selected dropdown options - if selected
-            const filteredDataArr = dataArrP?.filter((elem: ItemData) =>
-                (!selectedMinYearP || Number(elem?.t?.split("-")[0]) >= Number(selectedMinYearP)) &&
-                (!selectedMaxYearP || Number(elem?.t?.split("-")[0]) <= Number(selectedMaxYearP)));
+            setDataArr([], () => {
+                // filter data against selected dropdown options - if selected
+                const filteredDataArr = dataArrP?.filter((elem: ItemData) =>
+                    (!selectedMinYearP || Number(elem?.t?.split("-")[0]) >= Number(selectedMinYearP)) &&
+                    (!selectedMaxYearP || Number(elem?.t?.split("-")[0]) <= Number(selectedMaxYearP)));
 
-            setDataArr(filteredDataArr);
+                setDataArr(filteredDataArr);
 
-            // collect all years
-            const allYears = dataArrP?.map((elem: ItemData) => Number(elem?.t?.split("-")[0]));
+                // collect all years
+                const allYears = dataArrP?.map((elem: ItemData) => Number(elem?.t?.split("-")[0]));
 
-            // remove duplicates, values to be used for the y axis line
-            const uniqueYears: any = [...new Set(allYears)]?.sort();
+                // remove duplicates, values to be used for the y axis line
+                const uniqueYears: any = [...new Set(allYears)]?.sort();
 
-            setUniqueYears(uniqueYears);
+                setUniqueYears(uniqueYears);
 
-            // calculate the min (start) and max (end) years to be used for the dropdowns
-            const minYearT = Math.min(...uniqueYears).toString();
-            const maxYearT = Math.max(...uniqueYears).toString();
+                // calculate the min (start) and max (end) years to be used for the dropdowns
+                const minYearT = Math.min(...uniqueYears).toString();
+                const maxYearT = Math.max(...uniqueYears).toString();
 
-            setMinYear(minYearT);
-            setMaxYear(maxYearT);
+                setMinYear(minYearT);
+                setMaxYear(maxYearT);
 
-            setDisplayData(displayDataP);
-        });
+                setDisplayData(displayDataP);
+            });
+        } catch (err) {
+            console.error({ function: "handleDisplayData", err });
+        }
     };
 
     const setSelectedMinYearWrapper = (displayDataP: any, temperature: any, precipitation: any, selectedMinYearP: any, selectedMaxYearP: any) => {
-        console.error("@setSelectedMinYearWrapper");
+        try {
+            console.error("@setSelectedMinYearWrapper");
 
-        setSelectedMinYear(selectedMinYearP);
-        handleDisplayData(displayDataP, displayDataP === TEMPERATURE ? temperature : precipitation, selectedMinYearP, selectedMaxYearP)
+            setSelectedMinYear(selectedMinYearP);
+            handleDisplayData(displayDataP, displayDataP === TEMPERATURE ? temperature : precipitation, selectedMinYearP, selectedMaxYearP);
+        } catch (err) {
+            console.error({ function: "setSelectedMinYearWrapper", err });
+        }
     };
 
     const setSelectedMaxYearWrapper = (displayDataP: any, temperature: any, precipitation: any, selectedMinYearP: any, selectedMaxYearP: any) => {
-        console.error("@setSelectedMaxYearWrapper");
+        try {
+            console.error("@setSelectedMaxYearWrapper");
 
-        setSelectedMaxYear(selectedMaxYearP);
-        handleDisplayData(displayDataP, displayDataP === TEMPERATURE ? temperature : precipitation, selectedMinYearP, selectedMaxYearP);
+            setSelectedMaxYear(selectedMaxYearP);
+            handleDisplayData(displayDataP, displayDataP === TEMPERATURE ? temperature : precipitation, selectedMinYearP, selectedMaxYearP);
+        } catch (err) {
+            console.error({ function: "setSelectedMaxYearWrapper", err });
+        }
     };
 
     const setTemperatureWrapper = (data: any) => {
-        console.error("@setTemperatureWrapper");
+        try {
+            console.error("@setTemperatureWrapper");
 
-        if (!data?.length) {
-            return;
-        }
+            if (!data?.length) {
+                return;
+            }
 
-        setTemperature(data);
+            setTemperature(data);
 
-        if (displayData === TEMPERATURE) {
-            handleDisplayData(displayData, data, selectedMinYear, selectedMaxYear);
+            if (displayData === TEMPERATURE) {
+                handleDisplayData(displayData, data, selectedMinYear, selectedMaxYear);
+            }
+        } catch (err) {
+            console.error({ function: "setTemperatureWrapper", err });
         }
     };
 
     const setPrecipitationWrapper = (data: any) => {
-        console.error("@setPrecipitationWrapper");
+        try {
+            console.error("@setPrecipitationWrapper");
 
-        if (!data?.length) {
-            return;
-        }
-        setPrecipitation(data);
+            if (!data?.length) {
+                return;
+            }
+            setPrecipitation(data);
 
-        if (displayData === PRECIPITATION) {
-            handleDisplayData(displayData, data, selectedMinYear, selectedMaxYear);
+            if (displayData === PRECIPITATION) {
+                handleDisplayData(displayData, data, selectedMinYear, selectedMaxYear);
+            }
+        } catch (err) {
+            console.error({ function: "setPrecipitationWrapper", err });
         }
     };
 
     const setDBWrapper = (dbP: any, dbRequest: any) => {
-        console.error("@setDBWrapper");
+        try {
+            console.error("@setDBWrapper");
 
-        setDB(dbP);
-        setDBRequest(dbRequest);
+            setDB(dbP);
+            setDBRequest(dbRequest);
 
-        // check if data present in indexedDB and if so set the corresponding data state tables
-        setHasCheckedForTemperatureData(true);
-        readTableData(dbP, dbRequest, TEMPERATURE_TABLE, setTemperatureWrapper, setIsLoadingTemperature);
+            // check if data present in indexedDB and if so set the corresponding data state tables
+            setHasCheckedForTemperatureData(true);
+            readTableData(dbP, TEMPERATURE_TABLE, setTemperatureWrapper, setIsLoadingTemperature);
 
-        setHasCheckedForPrecipitation(true);
-        readTableData(dbP, dbRequest, PRECIPITATION_TABLE, setPrecipitationWrapper, setIsLoadingPrecipitation);
+            setHasCheckedForPrecipitation(true);
+            readTableData(dbP, PRECIPITATION_TABLE, setPrecipitationWrapper, setIsLoadingPrecipitation);
+        } catch (err) {
+            console.error({ function: "setDBWrapper", err });
+        }
     };
 
     // get indexedDB object
@@ -172,30 +169,22 @@ function App() {
             const isTemperaturePendingRetrieval = db && dbRequest && !isInitiatingDB && (!temperature || temperature.length == 0) && hasCheckedForTemperatureData && !isWritingTemperature && !isLoadingTemperature;
             if (isTemperaturePendingRetrieval) {
                 const temperatureT = await getData<ItemData>('../data/temperature.json');
-                writeTableData(db, dbRequest, TEMPERATURE_TABLE, temperatureT, setIsWritingTemperature);
-                readTableData(db, dbRequest, TEMPERATURE_TABLE, setTemperature, setIsLoadingTemperature);
+                writeTableData(db, TEMPERATURE_TABLE, temperatureT, setIsWritingTemperature);
+                readTableData(db, TEMPERATURE_TABLE, setTemperature, setIsLoadingTemperature);
             }
 
             const isPrecipitationPendingRetrieval = db && dbRequest && !isInitiatingDB && (!precipitation || precipitation.length == 0) && hasCheckedForPrecipitation && !isWritingPrecipitation && !isLoadingPrecipitation;
             if (isPrecipitationPendingRetrieval) {
                 const precipitationT = await getData<ItemData>('../data/precipitation.json');
-                writeTableData(db, dbRequest, PRECIPITATION_TABLE, precipitationT, setIsWritingPrecipitation);
-                readTableData(db, dbRequest, PRECIPITATION_TABLE, setPrecipitation, setIsLoadingPrecipitation);
+                writeTableData(db, PRECIPITATION_TABLE, precipitationT, setIsWritingPrecipitation);
+                readTableData(db, PRECIPITATION_TABLE, setPrecipitation, setIsLoadingPrecipitation);
             }
         })();
     }, []);
 
-    // console.error({
-    //     minYear, maxYear,
-    // })
-
     const isLoading = isLoadingTemperature || isLoadingPrecipitation;
 
     // construct menu items
-
-
-
-
     return (
         <div style={{ margin: "0 auto", width: "1600px" }}>
             <h1>Архив Метеослужбы</h1>
@@ -223,7 +212,7 @@ function App() {
                             {!isLoading ? <Select
                                 className="dropdown"
                                 options={getMenuOptions("Select Start Year", uniqueYears)}
-                                defaultValue={{label: minYear, value: minYear}}
+                                defaultValue={{ label: minYear, value: minYear }}
                                 onChange={(elem: any) => setSelectedMinYearWrapper(displayData, temperature, precipitation, elem.value, selectedMaxYear)}
                             /> : <p>Loading Start Years... Please wait!</p>}
                         </div>
@@ -231,7 +220,7 @@ function App() {
                             {!isLoading ? <Select
                                 className="dropdown"
                                 options={getMenuOptions("Select End Year", uniqueYears)}
-                                defaultValue={{label: maxYear, value: maxYear}}
+                                defaultValue={{ label: maxYear, value: maxYear }}
                                 onChange={(elem: any) => setSelectedMaxYearWrapper(displayData, temperature, precipitation, selectedMinYear, elem.value)}
                             /> : <p>Loading End Years... Please wait!</p>}
                         </div>

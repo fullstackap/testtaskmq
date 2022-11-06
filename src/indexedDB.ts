@@ -1,25 +1,21 @@
+import { DB, PRECIPITATION_TABLE, TEMPERATURE_TABLE } from './constants';
 import type { ItemData } from './types';
-
-export const DB = "weather_service_archive";
-export const TEMPERATURE_TABLE = "temperature";
-export const PRECIPITATION_TABLE = "precipitation";
-
-// prefixes of implementation that we want to test
-// window.indexedDB = window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB;
-
-// //prefixes of window.IDB objects
-// window.IDBTransaction = window.IDBTransaction || window.webkitIDBTransaction || window.msIDBTransaction;
-// window.IDBKeyRange = window.IDBKeyRange || window.webkitIDBKeyRange || window.msIDBKeyRange
 
 if (!window.indexedDB) {
     window.alert("Your browser doesn't support a stable version of IndexedDB.")
 }
 
-const createTableWrapper = (db: any, dbRequest: any, tableName: string) => {
-    // db.deleteObjectStore(tableName);
+const createTableWrapper = (db: any, tableName: string) => {
+    try {
+        console.error("@createTableWrapper");
 
-    if (!db.objectStoreNames.contains(tableName)) {
-        db.createObjectStore(tableName, { autoIncrement: true });
+        // db.deleteObjectStore(tableName);
+
+        if (!db.objectStoreNames.contains(tableName)) {
+            db.createObjectStore(tableName, { autoIncrement: true });
+        }
+    } catch (err) {
+        console.error({ function: "initiateDB", err });
     }
 }
 
@@ -32,7 +28,7 @@ export const initiateDB = (setDBWrapper: any, setIsInitiatingDB: any) => {
         const request = window.indexedDB.open(DB, 1);
 
         request.onerror = (event: any) => {
-            console.error("initiateDB error");
+            console.error("@onerror");
         };
 
         request.onsuccess = (event: any) => {
@@ -43,21 +39,20 @@ export const initiateDB = (setDBWrapper: any, setIsInitiatingDB: any) => {
         }
 
         request.onupgradeneeded = (event: any) => {
+            console.error("@onupgradeneeded");
+
             var db = event.target.result;
 
-            createTableWrapper(db, request, TEMPERATURE_TABLE);
-            createTableWrapper(db, request, PRECIPITATION_TABLE);
-
-            console.error("initiateDB onupgradeneeded: " + db);
+            createTableWrapper(db, TEMPERATURE_TABLE);
+            createTableWrapper(db, PRECIPITATION_TABLE);
         }
     } catch (err) {
         console.error({ function: "initiateDB", err });
-
         setIsInitiatingDB(false);
     }
 }
 
-export const writeTableData = (db: any, dbRequest: any, tableName: string, data: ItemData[], setIsWriting: any) => {
+export const writeTableData = (db: any, tableName: string, data: ItemData[], setIsWriting: any) => {
     try {
         console.error("@writeTableData");
 
@@ -71,12 +66,11 @@ export const writeTableData = (db: any, dbRequest: any, tableName: string, data:
         setIsWriting(false);
     } catch (err) {
         console.error({ function: "writeTableData", err });
-
         setIsWriting(false);
     }
 };
 
-export const readTableData = (db: any, dbRequest: any, tableName: string, setData: any, setIsLoading: any) => {
+export const readTableData = (db: any, tableName: string, setData: any, setIsLoading: any) => {
     try {
         console.error("@readTableData");
 
@@ -103,7 +97,7 @@ export const readTableData = (db: any, dbRequest: any, tableName: string, setDat
     }
 };
 
-export const findTableData = (db: any, dbRequest: any, tableName: string, key: string, setData: any, setIsLoading: any) => {
+export const findTableData = (db: any, tableName: string, key: string, setData: any, setIsLoading: any) => {
     try {
         console.error("@findTableData");
 
@@ -128,7 +122,6 @@ export const findTableData = (db: any, dbRequest: any, tableName: string, key: s
         };
     } catch (err) {
         console.error({ function: "readTableData", err });
-
         setIsLoading(false);
     }
 };

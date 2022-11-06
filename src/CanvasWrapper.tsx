@@ -1,17 +1,6 @@
 import { useEffect, useRef } from 'react';
+import { CANVAS_HEIGHT, CANVAS_WIDTH, GRAPH_BOTTOM, GRAPH_HEIGHT, GRAPH_LEFT, GRAPH_RIGHT, GRAPH_TOP, GRAPH_WIDTH } from './constants';
 import type { ItemData } from './types';
-
-const GRAPH_TOP = 0;
-const GRAPH_BOTTOM = 675;
-
-const GRAPH_LEFT = 0;
-const GRAPH_RIGHT = 825;
-
-const GRAPH_WIDTH = 800;
-const GRAPH_HEIGHT = 675;
-
-const CANVAS_WIDTH = 1000;
-const CANVAS_HEIGHT = 800;
 
 const CanvasWrapper = ({ dataArr, yAxisName }: any) => {
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -41,8 +30,7 @@ const CanvasWrapper = ({ dataArr, yAxisName }: any) => {
 
                 ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
 
-                // set font for fillText()  
-                ctx.font = "16px Arial";
+                ctx.font = "18px Arial";
 
                 const GRAPH_BOTTOM_EXT = yAxisName === "Осадки" ? GRAPH_BOTTOM - 25 : GRAPH_BOTTOM;
                 const GRAPH_HEIGHT_EXT = yAxisName === "Осадки" ? GRAPH_HEIGHT - 25 : GRAPH_HEIGHT;
@@ -74,8 +62,10 @@ const CanvasWrapper = ({ dataArr, yAxisName }: any) => {
                         ctx.lineWidth = 3;
                     }
 
+                    const v = value.toFixed(2).toString();
+
                     // draw reference value 
-                    ctx.fillText(value.toFixed(2).toString(), xCoord, yCoord);
+                    ctx.fillText(v, xCoord, yCoord);
                     ctx.stroke();
                     ctx.save();
 
@@ -101,10 +91,6 @@ const CanvasWrapper = ({ dataArr, yAxisName }: any) => {
                 const fourthYCoordMax = GRAPH_TOP;
                 updateCtx(fourthYCoordMax, maxValue);
 
-                // console.error({
-                //     groundZero, firstYCoordMax, secondYCoordMax, thirdYCoordMax, fourthYCoordMax
-                // })
-
                 if (minValue < 0) {
                     // draw 2nd reference line and value
                     updateCtx(groundZero, 0);
@@ -123,15 +109,7 @@ const CanvasWrapper = ({ dataArr, yAxisName }: any) => {
 
                     const fourthYCoordMin = groundZero + groundZero;
                     updateCtx(fourthYCoordMin, minValue);
-
-                    // console.error({
-                    //     groundZero, firstYCoordMin, secondYCoordMin, thirdYCoordMin, fourthYCoordMin
-                    // })
                 }
-
-                // console.error({
-                //     minValue, maxValue
-                // })
 
                 // draw titles  
                 ctx.fillText("Годы", GRAPH_WIDTH / 2, GRAPH_BOTTOM_EXT + 80);
@@ -139,19 +117,9 @@ const CanvasWrapper = ({ dataArr, yAxisName }: any) => {
 
                 ctx.beginPath();
                 ctx.lineJoin = "round";
-                ctx.strokeStyle = "grey";
-
-                if (arrayLen > 0) {
-                    ctx.moveTo(GRAPH_LEFT, (GRAPH_HEIGHT_EXT - dataArr[0] / (maxValue - minValue) * GRAPH_HEIGHT_EXT) + GRAPH_TOP);
-                }
-
-                // console.error({
-                //     minValue, maxValue
-                // })
+                ctx.strokeStyle = "#1890ff";
 
                 for (let i = 1; i < arrayLen; i++) {
-                    // context.lineTo( GRAPH_RIGHT / arrayLen * i + GRAPH_LEFT, ( GRAPH_HEIGHT_EXT - dataArr[ i ] / largest * GRAPH_HEIGHT_EXT ) + GRAPH_TOP );  
-
                     const x = GRAPH_RIGHT / arrayLen * i + GRAPH_LEFT;
                     let y = dataArr[i].v >= 0 ? groundZero + dataArr[i].v / maxValue * groundZero : groundZero - dataArr[i].v / minValue * groundZero;
                     if (yAxisName === "Осадки") {
