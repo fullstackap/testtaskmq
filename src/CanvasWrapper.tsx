@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import type { ItemData } from './types';
 
 const GRAPH_TOP = 25;
@@ -13,7 +13,9 @@ const GRAPH_HEIGHT = 650;
 const CANVAS_WIDTH = 1000;
 const CANVAS_HEIGHT = 788;
 
-const CanvasWrapper = ({ canvasRef, canvasCtxRef, dataArr, yAxisName }: any) => {
+const CanvasWrapper = ({  dataArr, yAxisName }: any) => {
+    const canvasRef = useRef<HTMLCanvasElement | null>(null);
+    const canvasCtxRef = useRef<CanvasRenderingContext2D | null>(null);
     useEffect(() => {
         if (canvasRef.current) {
             canvasCtxRef.current = canvasRef.current.getContext('2d');
@@ -21,6 +23,8 @@ const CanvasWrapper = ({ canvasRef, canvasCtxRef, dataArr, yAxisName }: any) => 
             const ctx = canvasCtxRef.current;
             if (ctx) {
                 const arrayLen = dataArr?.length;
+
+                console.error({arrayLen})
 
                 // get all filtered years in one array
                 const allYears = dataArr?.map((elem: ItemData) => Number(elem?.t?.split("-")[0]));
@@ -63,7 +67,7 @@ const CanvasWrapper = ({ canvasRef, canvasCtxRef, dataArr, yAxisName }: any) => 
                     ctx.beginPath();
                     ctx.moveTo(GRAPH_LEFT, yCoord);
                     ctx.lineTo(GRAPH_RIGHT, yCoord);
-                    // draw reference value for yAxisName  
+                    // draw reference value 
                     ctx.fillText(value.toFixed(2).toString(), xCoord, yCoord);
                     ctx.stroke();
                 }
@@ -78,7 +82,7 @@ const CanvasWrapper = ({ canvasRef, canvasCtxRef, dataArr, yAxisName }: any) => 
                 const secondYCoordMax = groundZero / 2;
                 updateCtx(secondYCoordMax, maxValue / 2);
 
-                // draw 3rd reference line   and value
+                // draw 3rd reference line and value
                 const thirdYCoordMax = groundZero / 4;
                 updateCtx(thirdYCoordMax, maxValue * (3 / 4));
 
@@ -119,7 +123,7 @@ const CanvasWrapper = ({ canvasRef, canvasCtxRef, dataArr, yAxisName }: any) => 
                 // })
 
                 // draw titles  
-                ctx.fillText("Years", GRAPH_WIDTH / 2, GRAPH_BOTTOM + 70);
+                ctx.fillText("Years", GRAPH_WIDTH / 2, GRAPH_BOTTOM + 80);
                 ctx.fillText(yAxisName, GRAPH_RIGHT + 80, GRAPH_HEIGHT / 2);
 
                 ctx.beginPath();
@@ -141,6 +145,8 @@ const CanvasWrapper = ({ canvasRef, canvasCtxRef, dataArr, yAxisName }: any) => 
                     //     break;
                     // }
                 }
+
+                // renderData(ctx);
 
                 const left = 0;
                 const diff = maxYear - minYear;

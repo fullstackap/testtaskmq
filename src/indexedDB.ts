@@ -1,6 +1,6 @@
 import type { ItemData } from './types';
 
-export const DB = "weather_research_archive";
+export const DB = "weather_service_archive";
 export const TEMPERATURE_TABLE = "temperature";
 export const PRECIPITATION_TABLE = "precipitation";
 
@@ -16,7 +16,7 @@ if (!window.indexedDB) {
 }
 
 const createTableWrapper = (db: any, dbRequest: any, tableName: string) => {
-    db.deleteObjectStore(tableName);
+    // db.deleteObjectStore(tableName);
 
     if (!db.objectStoreNames.contains(tableName)) {
         db.createObjectStore(tableName, { autoIncrement: true });
@@ -29,7 +29,7 @@ export const initiateDB = (setDBWrapper: any, setIsInitiatingDB: any) => {
 
         setIsInitiatingDB(true);
 
-        const request = window.indexedDB.open(DB, 3);
+        const request = window.indexedDB.open(DB, 1);
 
         request.onerror = (event: any) => {
             console.error("initiateDB error");
