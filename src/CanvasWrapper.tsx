@@ -145,9 +145,9 @@ const CanvasWrapper = ({ dataArr, yAxisName }: any) => {
                     ctx.moveTo(GRAPH_LEFT, (GRAPH_HEIGHT_EXT - dataArr[0] / (maxValue - minValue) * GRAPH_HEIGHT_EXT) + GRAPH_TOP);
                 }
 
-                console.error({
-                    minValue, maxValue
-                })
+                // console.error({
+                //     minValue, maxValue
+                // })
 
                 for (let i = 1; i < arrayLen; i++) {
                     // context.lineTo( GRAPH_RIGHT / arrayLen * i + GRAPH_LEFT, ( GRAPH_HEIGHT_EXT - dataArr[ i ] / largest * GRAPH_HEIGHT_EXT ) + GRAPH_TOP );  

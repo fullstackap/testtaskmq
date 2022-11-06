@@ -37,6 +37,14 @@ const useStateWithCallbackLazy = (initialValue: any) => {
     return [value, setValueWithCallback];
 };
 
+const getMenuOptions = (label = "Select Year", uniqueYears: any) => [
+    { label, value: "" },
+    ...uniqueYears
+        ?.map((value: any) => ({
+            label: value,
+            value,
+        }))];
+
 function App() {
     const [db, setDB] = useState<IDBDatabase>();
     const [dbRequest, setDBRequest] = useState<any>();
@@ -46,7 +54,7 @@ function App() {
     const [precipitation, setPrecipitation] = useState<ItemData[]>([]);
 
     const [displayData, setDisplayData] = useState<any>(TEMPERATURE);
-    const [minYear, setMinYear] = useState<any>('Select Year');
+    const [minYear, setMinYear] = useState<any>('');
     const [maxYear, setMaxYear] = useState<any>('');
     const [selectedMinYear, setSelectedMinYear] = useState<any>('');
     const [selectedMaxYear, setSelectedMaxYear] = useState<any>('');
@@ -158,7 +166,7 @@ function App() {
         }
     }, []);
 
-    // if data not present in indexedDB, load and write from local files, and the read to initiate the graph
+    // if graph data is not present in indexedDB, load it and write from local files, and then read to initiate the graph
     useEffect(() => {
         (async () => {
             const isTemperaturePendingRetrieval = db && dbRequest && !isInitiatingDB && (!temperature || temperature.length == 0) && hasCheckedForTemperatureData && !isWritingTemperature && !isLoadingTemperature;
@@ -184,13 +192,9 @@ function App() {
     const isLoading = isLoadingTemperature || isLoadingPrecipitation;
 
     // construct menu items
-    const yearOptions = [
-        { label: 'Select Year', value: 'Select Year' },
-        ...uniqueYears
-            ?.map((value: any) => ({
-                label: value,
-                value,
-            }))];
+
+
+
 
     return (
         <div style={{ margin: "0 auto", width: "1600px" }}>
@@ -216,24 +220,20 @@ function App() {
                 <div className="rightcolumn">
                     <div className="card row">
                         <div className="column">
-                            <Select
+                            {!isLoading ? <Select
                                 className="dropdown"
-                                isClearable
-                                isLoading={isLoading}
-                                options={yearOptions}
-                                defaultValue={minYear}
+                                options={getMenuOptions("Select Start Year", uniqueYears)}
+                                defaultValue={{label: minYear, value: minYear}}
                                 onChange={(elem: any) => setSelectedMinYearWrapper(displayData, temperature, precipitation, elem.value, selectedMaxYear)}
-                            />
+                            /> : <p>Loading Start Years... Please wait!</p>}
                         </div>
                         <div className="column">
-                            <Select
+                            {!isLoading ? <Select
                                 className="dropdown"
-                                isClearable
-                                isLoading={isLoading}
-                                options={yearOptions}
-                                defaultValue={maxYear}
+                                options={getMenuOptions("Select End Year", uniqueYears)}
+                                defaultValue={{label: maxYear, value: maxYear}}
                                 onChange={(elem: any) => setSelectedMaxYearWrapper(displayData, temperature, precipitation, selectedMinYear, elem.value)}
-                            />
+                            /> : <p>Loading End Years... Please wait!</p>}
                         </div>
                     </div>
                     <div className="card">
