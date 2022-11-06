@@ -5,7 +5,7 @@ import type { ItemData } from './types';
 import Select from 'react-select'
 import { Button, Col, Row } from 'antd';
 import 'antd/dist/antd.css'
-import CanvasWrapper from './CanvasWrapper';
+import CanvasWrapper from './components/CanvasWrapper';
 import { initiateDB, readTableData, writeTableData } from './indexedDB';
 import { PRECIPITATION, PRECIPITATION_TABLE, TEMPERATURE, TEMPERATURE_TABLE } from './constants';
 import useStateWithCallback from './useStateWithCallback';
@@ -46,6 +46,8 @@ function App() {
 
     const temperatureButtonRef = useRef<HTMLButtonElement>(null);
     const precipitationButtonRef = useRef<HTMLButtonElement>(null);
+
+    
 
     const handleDisplayData = (displayDataP: any, dataArrP: any, selectedMinYearP: any, selectedMaxYearP: any) => {
         try {

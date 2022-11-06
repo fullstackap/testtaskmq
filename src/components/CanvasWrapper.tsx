@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
-import { CANVAS_HEIGHT, CANVAS_WIDTH, GRAPH_BOTTOM, GRAPH_HEIGHT, GRAPH_LEFT, GRAPH_RIGHT, GRAPH_TOP, GRAPH_WIDTH } from './constants';
-import type { ItemData } from './types';
+import { CANVAS_HEIGHT, CANVAS_WIDTH, GRAPH_BOTTOM, GRAPH_HEIGHT, GRAPH_LEFT, GRAPH_RIGHT, GRAPH_TOP, GRAPH_WIDTH, PRECIPITATION, TEMPERATURE } from '../constants';
+import type { ItemData } from '../types';
 
 const CanvasWrapper = ({ dataArr, yAxisName }: any) => {
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -63,9 +63,10 @@ const CanvasWrapper = ({ dataArr, yAxisName }: any) => {
                     }
 
                     const v = value.toFixed(2).toString();
+                    const t = yAxisName === TEMPERATURE ? `${v} C°` : `${v} %`;
 
                     // draw reference value 
-                    ctx.fillText(v, xCoord, yCoord);
+                    ctx.fillText(t, xCoord, yCoord);
                     ctx.stroke();
                     ctx.save();
 
@@ -111,10 +112,13 @@ const CanvasWrapper = ({ dataArr, yAxisName }: any) => {
                     updateCtx(fourthYCoordMin, minValue);
                 }
 
-                // draw titles  
+                // draw x title 
                 ctx.fillText("Годы", GRAPH_WIDTH / 2, GRAPH_BOTTOM_EXT + 80);
-                ctx.fillText(yAxisName, GRAPH_RIGHT + 80, GRAPH_HEIGHT_EXT / 2);
 
+                // draw y title  
+                ctx.fillText(yAxisName, GRAPH_RIGHT + 100, GRAPH_HEIGHT_EXT / 2);
+
+                // draw y points
                 ctx.beginPath();
                 ctx.lineJoin = "round";
                 ctx.strokeStyle = "#1890ff";
@@ -122,23 +126,15 @@ const CanvasWrapper = ({ dataArr, yAxisName }: any) => {
                 for (let i = 1; i < arrayLen; i++) {
                     const x = GRAPH_RIGHT / arrayLen * i + GRAPH_LEFT;
                     let y = dataArr[i].v >= 0 ? groundZero + dataArr[i].v / maxValue * groundZero : groundZero - dataArr[i].v / minValue * groundZero;
-                    if (yAxisName === "Осадки") {
+                    if (yAxisName === PRECIPITATION) {
                         y = groundZero - dataArr[i].v / maxValue * groundZero;
                     }
                     ctx.lineTo(x, y);
-
-                    // console.error({ GRAPH_RIGHT, arrayLen, i, GRAPH_LEFT, x, y, v: dataArr[i].v });
-
-                    // if (i == 5) {
-                    //     break;
-                    // }
                 }
 
-                // renderData(ctx);
-
+                // draw x points
                 const left = 0;
                 const diff = maxYear - minYear;
-
                 ctx.fillText(uniqueYears[0], left, GRAPH_BOTTOM_EXT + 35);
                 if (diff > 4) ctx.fillText(uniqueYears[Math.floor(uniqueYears.length / 5)], left + (GRAPH_WIDTH / 5), GRAPH_BOTTOM_EXT + 35);
                 if (diff > 2) ctx.fillText(uniqueYears[Math.floor(uniqueYears.length / 2)], left + (GRAPH_WIDTH / 2), GRAPH_BOTTOM_EXT + 35);
