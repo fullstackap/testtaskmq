@@ -3,13 +3,14 @@ import { useState, useEffect } from 'react';
 import { getData } from './utils';
 import type { ItemData } from './types';
 import Select from 'react-select'
-import { Button } from 'antd';
+import { Button, Col, Row } from 'antd';
 import 'antd/dist/antd.css'
 import CanvasWrapper from './CanvasWrapper';
 import { initiateDB, PRECIPITATION_TABLE, readTableData, TEMPERATURE_TABLE, writeTableData } from './indexedDB';
 
-const TEMPERATURE = "Temperature";
-const PRECIPITATION = "Precipitation";
+
+const TEMPERATURE = "Температура";
+const PRECIPITATION = "Осадки";
 
 const useStateWithCallbackLazy = (initialValue: any) => {
     const callbackRef = useRef<any>(null);
@@ -45,7 +46,7 @@ function App() {
     const [precipitation, setPrecipitation] = useState<ItemData[]>([]);
 
     const [displayData, setDisplayData] = useState<any>(TEMPERATURE);
-    const [minYear, setMinYear] = useState<any>('');
+    const [minYear, setMinYear] = useState<any>('Select Year');
     const [maxYear, setMaxYear] = useState<any>('');
     const [selectedMinYear, setSelectedMinYear] = useState<any>('');
     const [selectedMaxYear, setSelectedMaxYear] = useState<any>('');
@@ -176,14 +177,15 @@ function App() {
         })();
     }, []);
 
-    console.error({
-        minYear, maxYear,
-    })
+    // console.error({
+    //     minYear, maxYear,
+    // })
 
     const isLoading = isLoadingTemperature || isLoadingPrecipitation;
 
     // construct menu items
     const yearOptions = [
+        { label: 'Select Year', value: 'Select Year' },
         ...uniqueYears
             ?.map((value: any) => ({
                 label: value,
@@ -191,48 +193,58 @@ function App() {
             }))];
 
     return (
-        <div style={{ margin: "0 auto", width: "1280px" }}>
-            <div>
-                <Button type="primary" size="large" id={TEMPERATURE} ref={temperatureButtonRef} onClick={() => handleDisplayData(TEMPERATURE, temperature, selectedMinYear, selectedMaxYear)}>
-                    Temperature
-                </Button>
-            </div>
+        <div style={{ margin: "0 auto", width: "1600px" }}>
+            <h1>Архив Метеослужбы</h1>
+            <div className="row">
+                <div className="leftcolumn">
+                    <div className="card">
+                        <div>
+                            <Button type="primary" className="full-width-btn" size="large" id={TEMPERATURE} ref={temperatureButtonRef} onClick={() => handleDisplayData(TEMPERATURE, temperature, selectedMinYear, selectedMaxYear)}>
+                                Температура
+                            </Button>
+                        </div>
 
-            <br />
+                        <br />
 
-            <div>
-                <Button type="primary" size="large" id={PRECIPITATION} ref={precipitationButtonRef} onClick={() => handleDisplayData(PRECIPITATION, precipitation, selectedMinYear, selectedMaxYear)}>
-                    Precipitation
-                </Button>
-            </div>
-
-            <br />
-
-            <div>
-                <Select
-                    isLoading={isLoading}
-                    options={yearOptions}
-                    defaultValue={{ label: minYear, value: minYear }}
-                    onChange={(elem: any) => setSelectedMinYearWrapper(displayData, temperature, precipitation, elem.value, selectedMaxYear)} />
-            </div>
-
-            <br />
-
-            <div>
-                <Select
-                    isLoading={isLoading}
-                    options={yearOptions}
-                    defaultValue={{ label: maxYear, value: maxYear }}
-                    onChange={(elem: any) => setSelectedMaxYearWrapper(displayData, temperature, precipitation, selectedMinYear, elem.value)} />
-            </div>
-
-            <br />
-
-            <div style={{ border: "1px solid grey", width: "1280px", height: "1280px" }}>
-                {!isLoading && dataArr.length > 0 ?
-                    <CanvasWrapper dataArr={dataArr} yAxisName={displayData} /> :
-                    < div style={{ margin: "640px auto", width: "100px", }}><h1>GRAPH</h1></div>
-                }
+                        <div>
+                            <Button type="primary" className="full-width-btn" size="large" id={PRECIPITATION} ref={precipitationButtonRef} onClick={() => handleDisplayData(PRECIPITATION, precipitation, selectedMinYear, selectedMaxYear)}>
+                                Осадки
+                            </Button>
+                        </div>
+                    </div>
+                </div>
+                <div className="rightcolumn">
+                    <div className="card row">
+                        <div className="column">
+                            <Select
+                                className="dropdown"
+                                isClearable
+                                isLoading={isLoading}
+                                options={yearOptions}
+                                defaultValue={minYear}
+                                onChange={(elem: any) => setSelectedMinYearWrapper(displayData, temperature, precipitation, elem.value, selectedMaxYear)}
+                            />
+                        </div>
+                        <div className="column">
+                            <Select
+                                className="dropdown"
+                                isClearable
+                                isLoading={isLoading}
+                                options={yearOptions}
+                                defaultValue={maxYear}
+                                onChange={(elem: any) => setSelectedMaxYearWrapper(displayData, temperature, precipitation, selectedMinYear, elem.value)}
+                            />
+                        </div>
+                    </div>
+                    <div className="card">
+                        <div>
+                            {!isLoading && dataArr.length > 0 ?
+                                <CanvasWrapper dataArr={dataArr} yAxisName={displayData} /> :
+                                < div style={{ margin: "640px auto", width: "100px", }}><h1>График</h1></div>
+                            }
+                        </div>
+                    </div>
+                </div>
             </div>
         </div >
     );
