@@ -2,6 +2,8 @@ import { ItemData } from "../types";
 import http from "../axios";
 
 class TemperatureService {
+  constructor() {}
+
   getAll = () => {
     return http.get<any>("/weather-service-archive/temperature");
   }
@@ -45,4 +47,4 @@ class TemperatureService {
   }
 }
 
-export default new TemperatureService();
+export default TemperatureService;

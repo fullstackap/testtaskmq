@@ -1,10 +1,16 @@
 import { ItemData } from "../types";
-import PrecipitationService from "./precipitations.service";
+import PrecipitationService from "./precipitation.service";
 
 class PrecipitationServiceCalls {
-  getAll = async (callback: any) => {
+  service: PrecipitationService;
+
+  constructor() {
+    this.service = new PrecipitationService();
+  }
+
+  getAll = async (callback: any = null) => {
     try {
-      const response = await PrecipitationService.getAll();
+      const response = await this.service.getAll();
       if (callback) {
         callback(response.data);
       }
@@ -13,9 +19,9 @@ class PrecipitationServiceCalls {
     }
   };
 
-  getOne = async (id: string, callback: any) => {
+  getOne = async (id: string, callback: any = null) => {
     try {
-      const response = await PrecipitationService.getOne(id);
+      const response = await this.service.getOne(id);
       if (callback) {
         callback(response.data);
       }
@@ -25,9 +31,9 @@ class PrecipitationServiceCalls {
 
   }
 
-  create = async (data: ItemData[], callback: any) => {
+  create = async (data: ItemData[], callback: any = null) => {
     try {
-      const response = await PrecipitationService.create(data);
+      const response = await this.service.create(data);
       if (callback) {
         callback(response.data);
       }
@@ -37,9 +43,9 @@ class PrecipitationServiceCalls {
 
   }
 
-  update = async (id: string, data: ItemData, callback: any) => {
+  update = async (id: string, data: ItemData, callback: any = null) => {
     try {
-      const response = await PrecipitationService.update(id, data);
+      const response = await this.service.update(id, data);
       if (callback) {
         callback(response.data);
       }
@@ -49,9 +55,9 @@ class PrecipitationServiceCalls {
 
   }
 
-  deleteP = async (id: string, callback: any) => {
+  deleteP = async (id: string, callback: any = null) => {
     try {
-      const response = await PrecipitationService.deleteP(id);
+      const response = await this.service.deleteP(id);
       if (callback) {
         callback(response.data);
       }
@@ -61,9 +67,9 @@ class PrecipitationServiceCalls {
 
   }
 
-  deleteAll = async (callback: any) => {
+  deleteAll = async (callback: any = null) => {
     try {
-      const response = await PrecipitationService.deleteAll();
+      const response = await this.service.deleteAll();
       if (callback) {
         callback(response.data);
       }
@@ -73,9 +79,9 @@ class PrecipitationServiceCalls {
 
   }
 
-  filter = async (filters: any, callback: any) => {
+  filter = async (filters: any, callback: any = null) => {
     try {
-      const response = await PrecipitationService.filter(filters);
+      const response = await this.service.filter(filters);
       if (callback) {
         callback(response.data);
       }
@@ -85,4 +91,4 @@ class PrecipitationServiceCalls {
   }
 }
 
-export default new PrecipitationServiceCalls();
+export default PrecipitationServiceCalls;
