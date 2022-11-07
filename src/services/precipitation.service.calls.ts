@@ -20,7 +20,7 @@ class PrecipitationServiceCalls {
         callback(response.data);
       }
     } catch (err) {
-      console.error({ function: "getAll", err });
+      console.error({ function: "getOne", err });
     }
 
   }
@@ -32,7 +32,7 @@ class PrecipitationServiceCalls {
         callback(response.data);
       }
     } catch (err) {
-      console.error({ function: "getAll", err });
+      console.error({ function: "create", err });
     }
 
   }
@@ -44,7 +44,7 @@ class PrecipitationServiceCalls {
         callback(response.data);
       }
     } catch (err) {
-      console.error({ function: "getAll", err });
+      console.error({ function: "update", err });
     }
 
   }
@@ -56,7 +56,7 @@ class PrecipitationServiceCalls {
         callback(response.data);
       }
     } catch (err) {
-      console.error({ function: "getAll", err });
+      console.error({ function: "deleteP", err });
     }
 
   }
@@ -68,7 +68,7 @@ class PrecipitationServiceCalls {
         callback(response.data);
       }
     } catch (err) {
-      console.error({ function: "getAll", err });
+      console.error({ function: "deleteAll", err });
     }
 
   }
@@ -80,7 +80,7 @@ class PrecipitationServiceCalls {
         callback(response.data);
       }
     } catch (err) {
-      console.error({ function: "getAll", err });
+      console.error({ function: "filter", err });
     }
   }
 }
