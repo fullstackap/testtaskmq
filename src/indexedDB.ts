@@ -87,8 +87,7 @@ export const readTableData = (db: any, tableName: string, setData: any, setIsLoa
         request.onsuccess = (event: any) => {
             const dataT = event?.target?.result;
             setData(dataT);
-            setIsLoading(false);
-        };
+            setIsLoading(false);        };
 
     } catch (err) {
         console.error({ function: "readTableData", err, tableName });

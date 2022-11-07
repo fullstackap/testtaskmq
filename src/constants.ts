@@ -20,7 +20,5 @@ export const PRECIPITATION_TABLE = "precipitation";
 export const TEMPERATURE = "Температура";
 export const PRECIPITATION = "Осадки";
 
-
 // server
-export const ORIGIN_URL = "http://127.0.0.1:5000/";
-export const API_URL = "http://localhost:8080/api";
+export const API_URL = "http:localhost:8080/api"
