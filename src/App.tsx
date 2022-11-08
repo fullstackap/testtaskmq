@@ -43,10 +43,9 @@ const App = () => {
     const temperatureButtonRef = useRef<HTMLButtonElement>(null);
     const precipitationButtonRef = useRef<HTMLButtonElement>(null);
 
+    // handleDisplayData handles the display of the table data, ie. first filters it against selected drop down values and then sets the corresponding states
     const handleDisplayData = (displayDataP: any, dataArrP: any, selectedMinYearP: any, selectedMaxYearP: any) => {
         try {
-            console.error("@handleDisplayData");
-
             setDataArr([], () => {
                 // filter data against selected dropdown options - if selected
                 const filteredDataArr = dataArrP?.filter((elem: ItemData) =>
@@ -77,10 +76,9 @@ const App = () => {
         }
     };
 
+    // setSelectedMinYearWrapper is a wrapper around setting the state of the selected min year which then triggers handleDisplayData
     const setSelectedMinYearWrapper = (displayDataP: any, temperature: any, precipitation: any, selectedMinYearP: any, selectedMaxYearP: any) => {
         try {
-            console.error("@setSelectedMinYearWrapper");
-
             setSelectedMinYear(selectedMinYearP);
             handleDisplayData(displayDataP, displayDataP === TEMPERATURE ? temperature : precipitation, selectedMinYearP, selectedMaxYearP);
         } catch (err) {
@@ -88,10 +86,9 @@ const App = () => {
         }
     };
 
+    // setSelectedMaxYearWrapper is a wrapper around setting the state of the selected max year which then triggers handleDisplayData
     const setSelectedMaxYearWrapper = (displayDataP: any, temperature: any, precipitation: any, selectedMinYearP: any, selectedMaxYearP: any) => {
         try {
-            console.error("@setSelectedMaxYearWrapper");
-
             setSelectedMaxYear(selectedMaxYearP);
             handleDisplayData(displayDataP, displayDataP === TEMPERATURE ? temperature : precipitation, selectedMinYearP, selectedMaxYearP);
         } catch (err) {
@@ -99,51 +96,52 @@ const App = () => {
         }
     };
 
-    const setTemperatureWrapper = (data: any) => {
+    // setTemperatureWrapper is a wrapper around setting the state of the temperature data which then triggers handleDisplayData
+    const setTemperatureWrapper = (displayDataP: any, data: any) => {
         try {
-            console.error("@setTemperatureWrapper");
-
             if (!data?.length) {
                 return;
             }
 
             setTemperature(data);
 
-            handleDisplayData(TEMPERATURE, data, selectedMinYear, selectedMaxYear);
+            if (displayDataP === TEMPERATURE) {
+                handleDisplayData(displayDataP, data, selectedMinYear, selectedMaxYear);
+            }
 
         } catch (err) {
             console.error({ function: "setTemperatureWrapper", err });
         }
     };
 
-    const setPrecipitationWrapper = (data: any) => {
+    // setPrecipitationWrapper is a wrapper around setting the state of the precipitation data which then triggers handleDisplayData
+    const setPrecipitationWrapper = (displayDataP: any, data: any) => {
         try {
-            console.error("@setPrecipitationWrapper");
-
             if (!data?.length) {
                 return;
             }
 
             setPrecipitation(data);
 
-            handleDisplayData(PRECIPITATION, data, selectedMinYear, selectedMaxYear);
+            if (displayDataP === PRECIPITATION) {
+                handleDisplayData(displayDataP, data, selectedMinYear, selectedMaxYear);
+            }
         } catch (err) {
             console.error({ function: "setPrecipitationWrapper", err });
         }
     };
 
-    const setDBWrapper = (dbP: any, dbRequest: any) => {
+    // setPrecipitationWrapper is a wrapper around setting the state of connection to the indexedDB data which then starts reading the data from the corresponding tables
+    const setDBWrapper = (displayDataP: any, dbP: any, dbRequest: any) => {
         try {
-            console.error("@setDBWrapper");
-
             setDB(dbP);
             setDBRequest(dbRequest);
 
             // read temperature data from indexedDB and if so set the corresponding data state tables
-            indexedDBSvc.readTableData(dbP, TEMPERATURE_TABLE, setTemperatureWrapper, setIsLoadingTemperature);
+            indexedDBSvc.readTableData(displayDataP, dbP, TEMPERATURE_TABLE, setTemperatureWrapper, setIsLoadingTemperature);
 
             // read precipitation data from indexedDB and if so set the corresponding data state tables
-            indexedDBSvc.readTableData(dbP, PRECIPITATION_TABLE, setPrecipitationWrapper, setIsLoadingPrecipitation);
+            indexedDBSvc.readTableData(displayDataP, dbP, PRECIPITATION_TABLE, setPrecipitationWrapper, setIsLoadingPrecipitation);
         } catch (err) {
             console.error({ function: "setDBWrapper", err });
         }
@@ -152,7 +150,7 @@ const App = () => {
     // get indexedDB object
     useEffect(() => {
         if (!db && !dbRequest && !isInitiatingDB) {
-            indexedDBSvc.initiateDB(setDBWrapper, setIsInitiatingDB);
+            indexedDBSvc.initiateDB(displayData, setDBWrapper, setIsInitiatingDB);
         }
     }, []);
 
@@ -160,7 +158,7 @@ const App = () => {
 
     // construct menu items
     return (
-        <div style={{ margin: "0 auto", width: "1600px" }}>
+        <div className="container">
             <h1>Архив Метеослужбы</h1>
             <div className="row">
                 <div className="leftcolumn">

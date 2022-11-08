@@ -2,6 +2,42 @@ import { useEffect, useRef } from 'react';
 import { CANVAS_HEIGHT, CANVAS_WIDTH, GRAPH_BOTTOM, GRAPH_HEIGHT, GRAPH_LEFT, GRAPH_RIGHT, GRAPH_TOP, GRAPH_WIDTH, PRECIPITATION, TEMPERATURE } from '../constants';
 import type { ItemData } from '../types';
 
+const updateMaxCtx = (ctx: any, yAxisName: string, xCoord: number, yCoord: number, value: number) => {
+    const v = value.toFixed(2).toString();
+    const t = yAxisName === TEMPERATURE ? `${v} C°` : `${v} %`;
+
+    // draw reference value 
+    ctx.fillText(t, xCoord, yCoord);
+    ctx.stroke();
+    ctx.save();
+
+    ctx.lineWidth = 1;
+    ctx.save();
+}
+
+const updateCtx = (ctx: any, yAxisName: string, xCoord: number, yCoord: number, value: number) => {
+    // draw reference line
+    ctx.save();
+    ctx.beginPath();
+    ctx.moveTo(GRAPH_LEFT, yCoord);
+    ctx.lineTo(GRAPH_RIGHT, yCoord);
+
+    if (value == 0) {
+        ctx.lineWidth = 3;
+    }
+
+    const v = value.toFixed(2).toString();
+    const t = yAxisName === TEMPERATURE ? `${v} C°` : `${v} %`;
+
+    // draw reference value 
+    ctx.fillText(t, xCoord, yCoord);
+    ctx.stroke();
+    ctx.save();
+
+    ctx.lineWidth = 1;
+    ctx.save();
+}
+
 const CanvasWrapper = ({ dataArr, yAxisName }: any) => {
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
     const canvasCtxRef = useRef<CanvasRenderingContext2D | null>(null);
@@ -32,8 +68,8 @@ const CanvasWrapper = ({ dataArr, yAxisName }: any) => {
 
                 ctx.font = "18px Arial";
 
-                const GRAPH_BOTTOM_EXT = yAxisName === "Осадки" ? GRAPH_BOTTOM - 25 : GRAPH_BOTTOM;
-                const GRAPH_HEIGHT_EXT = yAxisName === "Осадки" ? GRAPH_HEIGHT - 25 : GRAPH_HEIGHT;
+                const GRAPH_BOTTOM_EXT = yAxisName === PRECIPITATION ? GRAPH_BOTTOM - 25 : GRAPH_BOTTOM;
+                const GRAPH_HEIGHT_EXT = yAxisName === PRECIPITATION ? GRAPH_HEIGHT - 25 : GRAPH_HEIGHT;
 
                 // draw X and Y axis  
                 ctx.beginPath();
@@ -51,72 +87,52 @@ const CanvasWrapper = ({ dataArr, yAxisName }: any) => {
 
                 const xCoord = GRAPH_RIGHT + 15;
 
-                const updateCtx = (yCoord: number, value: number) => {
-                    // draw reference line
-                    ctx.save();
-                    ctx.beginPath();
-                    ctx.moveTo(GRAPH_LEFT, yCoord);
-                    ctx.lineTo(GRAPH_RIGHT, yCoord);
-
-                    if (value == 0) {
-                        ctx.lineWidth = 3;
-                    }
-
-                    const v = value.toFixed(2).toString();
-                    const t = yAxisName === TEMPERATURE ? `${v} C°` : `${v} %`;
-
-                    // draw reference value 
-                    ctx.fillText(t, xCoord, yCoord);
-                    ctx.stroke();
-                    ctx.save();
-
-                    ctx.lineWidth = 1;
-                    ctx.save();
-                }
-
                 const groundZero = (minValue < 0 ? GRAPH_HEIGHT_EXT / 2 : GRAPH_HEIGHT_EXT);
 
                 // draw 1st reference line and value
+                updateCtx(ctx, yAxisName, xCoord, GRAPH_HEIGHT_EXT, 0);
+
+                // draw 1st reference line and value
                 const firstYCoordMax = groundZero * (3 / 4);
-                updateCtx(firstYCoordMax, maxValue / 4);
+                updateCtx(ctx, yAxisName, xCoord, firstYCoordMax, maxValue / 4);
 
                 // draw 2nd reference line and value
                 const secondYCoordMax = groundZero / 2;
-                updateCtx(secondYCoordMax, maxValue / 2);
+                updateCtx(ctx, yAxisName, xCoord, secondYCoordMax, maxValue / 2);
 
                 // draw 3rd reference line and value
                 const thirdYCoordMax = groundZero / 4;
-                updateCtx(thirdYCoordMax, maxValue * (3 / 4));
+                updateCtx(ctx, yAxisName, xCoord, thirdYCoordMax, maxValue * (3 / 4));
 
                 // draw 4th reference line and value
-                const fourthYCoordMax = GRAPH_TOP;
-                updateCtx(fourthYCoordMax, maxValue);
+                const fourthYCoordMax = GRAPH_TOP + 15;
+                updateMaxCtx(ctx, yAxisName, xCoord, fourthYCoordMax, maxValue);
 
                 if (minValue < 0) {
-                    // draw 2nd reference line and value
-                    updateCtx(groundZero, 0);
-
                     // draw 1st reference line and value
-                    const firstYCoordMin = groundZero / 4 + groundZero;
-                    updateCtx(firstYCoordMin, minValue / 4);
+                    updateCtx(ctx, yAxisName, xCoord, groundZero, 0);
 
                     // draw 2nd reference line and value
+                    const firstYCoordMin = groundZero / 4 + groundZero;
+                    updateCtx(ctx, yAxisName, xCoord, firstYCoordMin, minValue / 4);
+
+                    // draw 3rd reference line and value
                     const secondYCoordMin = groundZero / 2 + groundZero;
-                    updateCtx(secondYCoordMin, minValue / 2);
+                    updateCtx(ctx, yAxisName, xCoord, secondYCoordMin, minValue / 2);
 
                     // draw 3rd reference line   and value
                     const thirdYCoordMin = groundZero * (3 / 4) + groundZero;
-                    updateCtx(thirdYCoordMin, minValue * (3 / 4));
+                    updateCtx(ctx, yAxisName, xCoord, thirdYCoordMin, minValue * (3 / 4));
 
                     const fourthYCoordMin = groundZero + groundZero;
-                    updateCtx(fourthYCoordMin, minValue);
+                    updateCtx(ctx, yAxisName, xCoord, fourthYCoordMin, minValue);
                 }
 
                 // draw x title 
-                ctx.fillText("Годы", GRAPH_WIDTH / 2, GRAPH_BOTTOM_EXT + 80);
+                ctx.fillText("Годы", (GRAPH_BOTTOM_EXT + 25) / 2, GRAPH_BOTTOM_EXT + 80);
 
                 // draw y title  
-                ctx.fillText(yAxisName, GRAPH_RIGHT + 100, GRAPH_HEIGHT_EXT / 2);
+                ctx.fillText(yAxisName, GRAPH_RIGHT + 90, GRAPH_HEIGHT_EXT / 2);
 
                 // draw y points
                 ctx.beginPath();
@@ -129,6 +145,7 @@ const CanvasWrapper = ({ dataArr, yAxisName }: any) => {
                     if (yAxisName === PRECIPITATION) {
                         y = groundZero - dataArr[i].v / maxValue * groundZero;
                     }
+
                     ctx.lineTo(x, y);
                 }
 
@@ -136,10 +153,10 @@ const CanvasWrapper = ({ dataArr, yAxisName }: any) => {
                 const left = 0;
                 const diff = maxYear - minYear;
                 ctx.fillText(uniqueYears[0], left, GRAPH_BOTTOM_EXT + 35);
-                if (diff > 4) ctx.fillText(uniqueYears[Math.floor(uniqueYears.length / 5)], left + (GRAPH_WIDTH / 5), GRAPH_BOTTOM_EXT + 35);
-                if (diff > 2) ctx.fillText(uniqueYears[Math.floor(uniqueYears.length / 2)], left + (GRAPH_WIDTH / 2), GRAPH_BOTTOM_EXT + 35);
-                if (diff > 4) ctx.fillText(uniqueYears[Math.floor(uniqueYears.length / (4 / 3))], left + (GRAPH_WIDTH / (4 / 3)), GRAPH_BOTTOM_EXT + 35);
-                ctx.fillText(uniqueYears[uniqueYears.length - 1], left + (GRAPH_WIDTH / 1), GRAPH_BOTTOM_EXT + 35);
+                if (diff > 3) ctx.fillText(uniqueYears[Math.floor(uniqueYears.length / 5)], left + ((GRAPH_BOTTOM + 100) / 5), GRAPH_BOTTOM_EXT + 35);
+                if (diff > 1) ctx.fillText(uniqueYears[Math.floor(uniqueYears.length / 2)], left + (GRAPH_BOTTOM / 2), GRAPH_BOTTOM_EXT + 35);
+                if (diff > 3) ctx.fillText(uniqueYears[Math.floor(uniqueYears.length / (4 / 3))], left + ((GRAPH_BOTTOM + 25) / (4 / 3)), GRAPH_BOTTOM_EXT + 35);
+                ctx.fillText(uniqueYears[uniqueYears.length - 1], left + (GRAPH_BOTTOM + 25), GRAPH_BOTTOM_EXT + 35);
 
                 ctx.stroke();
             }

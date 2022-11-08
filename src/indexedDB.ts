@@ -17,10 +17,10 @@ class IndexedDB {
         this.precipitationServiceCallsSvc = new ServiceCalls(new PrecipitationService());
     }
 
+
+    // createTableWrapper creates the tableName collection
     createTableWrapper(db: any, tableName: string) {
         try {
-            console.error("@IndexedDB.createTableWrapper");
-
             // db.deleteObjectStore(tableName);
 
             if (!db.objectStoreNames.contains(tableName)) {
@@ -31,28 +31,24 @@ class IndexedDB {
         }
     }
 
-    initiateDB(setDBWrapper: any, setIsInitiatingDB: any) {
+    // initiateDB creates a db connection to indexedDB and creates collections if not already present
+    initiateDB(displayDataP: any, setDBWrapper: any, setIsInitiatingDB: any) {
         try {
-            console.error("@IndexedDB.initiateDB");
-
             setIsInitiatingDB(true);
 
             const request = window.indexedDB.open(DB, 1);
 
             request.onerror = (event: any) => {
-                console.error("@IndexedDB.onerror");
-            };
+                console.error("failed to initiate indexedDB");
+            }
 
             request.onsuccess = (event: any) => {
                 const dbT = request.result;
-                setDBWrapper(dbT, request);
+                setDBWrapper(displayDataP, dbT, request);
                 setIsInitiatingDB(false);
-                console.error("initiateDB success: " + dbT);
             }
 
             request.onupgradeneeded = (event: any) => {
-                console.error("@IndexedDB.onupgradeneeded");
-
                 var db = event.target.result;
 
                 this.createTableWrapper(db, TEMPERATURE_TABLE);
@@ -64,10 +60,9 @@ class IndexedDB {
         }
     }
 
-    readTableData(db: any, tableName: string, setData: any, setIsLoading: any) {
+    // readTableData reads data from indexedDB, if data is not present then it fetching it from remote db
+    readTableData(displayDataP: any, db: any, tableName: string, setData: any, setIsLoading: any) {
         try {
-            console.error("@IndexedDB.readTableData");
-
             setIsLoading(true);
 
             const transaction = db.transaction([tableName]);
@@ -75,7 +70,7 @@ class IndexedDB {
             const request = objectStore.getAll();
 
             request.onerror = (event: any) => {
-                console.error("error fetching table data");
+                console.error(`failed to fetch ${tableName} data`);
             };
 
             request.onsuccess = async (event: any) => {
@@ -109,7 +104,7 @@ class IndexedDB {
                     this.writeTableData(db, tableName, dataT);
                 }
 
-                setData(dataT);
+                setData(displayDataP, dataT);
                 setIsLoading(false);
             };
 
@@ -120,10 +115,9 @@ class IndexedDB {
         }
     }
 
+    // writeTableData writes data to indexedDB
     writeTableData(db: any, tableName: string, data: ItemData[]) {
         try {
-            console.error("@IndexedDB.writeTableData");
-
             const objectStore = db.transaction(tableName, "readwrite").objectStore(tableName);
             for (let i in data) {
                 objectStore.add({ id: `${(i + 1)}`, t: data[i].t.split("T")[0], v: data[i].v });
