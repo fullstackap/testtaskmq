@@ -1,18 +1,20 @@
 import { ItemData } from "../types";
 import PrecipitationService from "./precipitation.service";
 
-class PrecipitationServiceCalls {
-  service: PrecipitationService;
+class ServiceCalls {
+  service: any;
 
-  constructor() {
-    this.service = new PrecipitationService();
+  constructor(service: any) {
+    this.service = service;
   }
 
-  getAll = async (callback: any = null) => {
+  getAll = async (offset: number, limit: number, callback: any = null) => {
     try {
-      const response = await this.service.getAll();
+      const response = await this.service.getAll(offset, limit);
       if (callback) {
-        callback(response.data);
+        callback(response?.data);
+      } else {
+        return new Promise((resolve: any) => resolve(response?.data));
       }
     } catch (err) {
       console.error({ function: "getAll", err });
@@ -23,7 +25,9 @@ class PrecipitationServiceCalls {
     try {
       const response = await this.service.getOne(id);
       if (callback) {
-        callback(response.data);
+        callback(response?.data);
+      } else {
+        return new Promise((resolve: any) => resolve(response?.data));
       }
     } catch (err) {
       console.error({ function: "getOne", err });
@@ -35,7 +39,9 @@ class PrecipitationServiceCalls {
     try {
       const response = await this.service.create(data);
       if (callback) {
-        callback(response.data);
+        callback(response?.data);
+      } else {
+        return new Promise((resolve: any) => resolve(response?.data));
       }
     } catch (err) {
       console.error({ function: "create", err });
@@ -47,7 +53,9 @@ class PrecipitationServiceCalls {
     try {
       const response = await this.service.update(id, data);
       if (callback) {
-        callback(response.data);
+        callback(response?.data);
+      } else {
+        return new Promise((resolve: any) => resolve(response?.data));
       }
     } catch (err) {
       console.error({ function: "update", err });
@@ -59,7 +67,9 @@ class PrecipitationServiceCalls {
     try {
       const response = await this.service.deleteP(id);
       if (callback) {
-        callback(response.data);
+        callback(response?.data);
+      } else {
+        return new Promise((resolve: any) => resolve(response?.data));
       }
     } catch (err) {
       console.error({ function: "deleteP", err });
@@ -71,7 +81,9 @@ class PrecipitationServiceCalls {
     try {
       const response = await this.service.deleteAll();
       if (callback) {
-        callback(response.data);
+        callback(response?.data);
+      } else {
+        return new Promise((resolve: any) => resolve(response?.data));
       }
     } catch (err) {
       console.error({ function: "deleteAll", err });
@@ -83,7 +95,9 @@ class PrecipitationServiceCalls {
     try {
       const response = await this.service.filter(filters);
       if (callback) {
-        callback(response.data);
+        callback(response?.data);
+      } else {
+        return new Promise((resolve: any) => resolve(response?.data));
       }
     } catch (err) {
       console.error({ function: "filter", err });
@@ -91,4 +105,4 @@ class PrecipitationServiceCalls {
   }
 }
 
-export default PrecipitationServiceCalls;
+export default ServiceCalls;

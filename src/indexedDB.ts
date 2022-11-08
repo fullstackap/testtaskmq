@@ -1,126 +1,137 @@
-import { DB, PRECIPITATION_TABLE, TEMPERATURE_TABLE } from './constants';
+import { DB, LIMIT_RECORDS, PRECIPITATION_TABLE, TEMPERATURE_TABLE } from './constants';
+import PrecipitationService from './services/precipitation.service';
+import ServiceCalls from './services/service.calls';
+import TemperatureService from './services/temperature.service';
 import type { ItemData } from './types';
 
 if (!window.indexedDB) {
     window.alert("Your browser doesn't support a stable version of IndexedDB.")
 }
 
-const createTableWrapper = (db: any, tableName: string) => {
-    try {
-        console.error("@createTableWrapper");
+class IndexedDB {
+    temperatureServiceCallsSvc: ServiceCalls;
+    precipitationServiceCallsSvc: ServiceCalls;
 
-        // db.deleteObjectStore(tableName);
-
-        if (!db.objectStoreNames.contains(tableName)) {
-            db.createObjectStore(tableName, { autoIncrement: true });
-        }
-    } catch (err) {
-        console.error({ function: "initiateDB", err });
+    constructor() {
+        this.temperatureServiceCallsSvc = new ServiceCalls(new TemperatureService());
+        this.precipitationServiceCallsSvc = new ServiceCalls(new PrecipitationService());
     }
-}
 
-export const initiateDB = (setDBWrapper: any, setIsInitiatingDB: any) => {
-    try {
-        console.error("@initiateDB");
+    createTableWrapper(db: any, tableName: string) {
+        try {
+            console.error("@IndexedDB.createTableWrapper");
 
-        setIsInitiatingDB(true);
+            // db.deleteObjectStore(tableName);
 
-        const request = window.indexedDB.open(DB, 1);
-
-        request.onerror = (event: any) => {
-            console.error("@onerror");
-        };
-
-        request.onsuccess = (event: any) => {
-            const dbT = request.result;
-            setDBWrapper(dbT, request);
-            setIsInitiatingDB(false);
-            console.error("initiateDB success: " + dbT);
-        }
-
-        request.onupgradeneeded = (event: any) => {
-            console.error("@onupgradeneeded");
-
-            var db = event.target.result;
-
-            createTableWrapper(db, TEMPERATURE_TABLE);
-            createTableWrapper(db, PRECIPITATION_TABLE);
-        }
-    } catch (err) {
-        console.error({ function: "initiateDB", err });
-        setIsInitiatingDB(false);
-    }
-}
-
-export const writeTableData = (db: any, tableName: string, data: ItemData[], setIsWriting: any) => {
-    try {
-        console.error("@writeTableData");
-
-        setIsWriting(true);
-
-        const objectStore = db.transaction(tableName, "readwrite").objectStore(tableName);
-        for (let i in data) {
-            objectStore.add({ id: `${(i + 1)}`, t: data[i].t, v: data[i].v });
-        }
-
-        setIsWriting(false);
-    } catch (err) {
-        console.error({ function: "writeTableData", err });
-        setIsWriting(false);
-    }
-};
-
-export const readTableData = (db: any, tableName: string, setData: any, setIsLoading: any) => {
-    try {
-        console.error("@readTableData");
-
-        setIsLoading(true);
-
-        const transaction = db.transaction([tableName]);
-        const objectStore = transaction.objectStore(tableName);
-        const request = objectStore.getAll();
-
-        request.onerror = (event: any) => {
-            console.error("error fetching table data");
-        };
-
-        request.onsuccess = (event: any) => {
-            const dataT = event?.target?.result;
-            setData(dataT);
-            setIsLoading(false);        };
-
-    } catch (err) {
-        console.error({ function: "readTableData", err, tableName });
-        setData([]);
-        setIsLoading(false);
-    }
-};
-
-export const findTableData = (db: any, tableName: string, key: string, setData: any, setIsLoading: any) => {
-    try {
-        console.error("@findTableData");
-
-        setIsLoading(true);
-
-        const transaction = db.transaction([tableName]);
-
-        const objectStore = transaction.objectStore(tableName);
-
-        const request = objectStore.get(key);
-
-        request.onerror = (event: any) => {
-            alert("Unable to retrieve data from database!");
-        };
-
-        request.onsuccess = (event: any) => {
-            if (request.result) {
-                setData(request.result);
-            } else {
-                setData(null);
+            if (!db.objectStoreNames.contains(tableName)) {
+                db.createObjectStore(tableName, { autoIncrement: true });
             }
-        };
-    } catch (err) {
-        console.error({ function: "readTableData", err });
-        setIsLoading(false);
+        } catch (err) {
+            console.error({ function: "IndexedDB.initiateDB", err });
+        }
     }
-};
+
+    initiateDB(setDBWrapper: any, setIsInitiatingDB: any) {
+        try {
+            console.error("@IndexedDB.initiateDB");
+
+            setIsInitiatingDB(true);
+
+            const request = window.indexedDB.open(DB, 1);
+
+            request.onerror = (event: any) => {
+                console.error("@IndexedDB.onerror");
+            };
+
+            request.onsuccess = (event: any) => {
+                const dbT = request.result;
+                setDBWrapper(dbT, request);
+                setIsInitiatingDB(false);
+                console.error("initiateDB success: " + dbT);
+            }
+
+            request.onupgradeneeded = (event: any) => {
+                console.error("@IndexedDB.onupgradeneeded");
+
+                var db = event.target.result;
+
+                this.createTableWrapper(db, TEMPERATURE_TABLE);
+                this.createTableWrapper(db, PRECIPITATION_TABLE);
+            }
+        } catch (err) {
+            console.error({ function: "IndexedDB.initiateDB", err });
+            setIsInitiatingDB(false);
+        }
+    }
+
+    readTableData(db: any, tableName: string, setData: any, setIsLoading: any) {
+        try {
+            console.error("@IndexedDB.readTableData");
+
+            setIsLoading(true);
+
+            const transaction = db.transaction([tableName]);
+            const objectStore = transaction.objectStore(tableName);
+            const request = objectStore.getAll();
+
+            request.onerror = (event: any) => {
+                console.error("error fetching table data");
+            };
+
+            request.onsuccess = async (event: any) => {
+                let dataT = event?.target?.result;
+
+                // REQUIRMENT: при отсутствии данных в таблице, данные для нее запрашиваются с сервера
+                // REQUIRMENT: данные с сервера запрашиваются по требованию, когда произошло обращение за соответствующими данными в локальную базу данных и они в ней не найдены
+                if (dataT && dataT?.length === 0) {
+                    if (tableName == TEMPERATURE_TABLE) {
+                        const resOne: any = await this.temperatureServiceCallsSvc.getAll(0, 1);
+                        if (resOne && resOne?.count > 0) {
+                            let offset = 0;
+                            for (let i = 0; i < resOne?.count; i = i + LIMIT_RECORDS) {
+                                const resAll: any = await this.temperatureServiceCallsSvc.getAll(offset, LIMIT_RECORDS);
+                                dataT = [...dataT, ...resAll?.items];
+                                offset = offset + LIMIT_RECORDS;
+                            }
+                        }
+                    } else if (tableName == PRECIPITATION_TABLE) {
+                        const resOne: any = await this.precipitationServiceCallsSvc.getAll(0, 1);
+                        if (resOne && resOne?.count > 0) {
+                            let offset = 0;
+                            for (let i = 0; i < resOne?.count; i = i + LIMIT_RECORDS) {
+                                const resAll: any = await this.precipitationServiceCallsSvc.getAll(offset, LIMIT_RECORDS);
+                                dataT = [...dataT, ...resAll?.items];
+                                offset = offset + LIMIT_RECORDS;
+                            }
+                        }
+                    }
+
+                    this.writeTableData(db, tableName, dataT);
+                }
+
+                setData(dataT);
+                setIsLoading(false);
+            };
+
+        } catch (err) {
+            console.error({ function: "IndexedDB.readTableData", err, tableName });
+            setData([]);
+            setIsLoading(false);
+        }
+    }
+
+    writeTableData(db: any, tableName: string, data: ItemData[]) {
+        try {
+            console.error("@IndexedDB.writeTableData");
+
+            const objectStore = db.transaction(tableName, "readwrite").objectStore(tableName);
+            for (let i in data) {
+                objectStore.add({ id: `${(i + 1)}`, t: data[i].t.split("T")[0], v: data[i].v });
+            }
+        } catch (err) {
+            console.error({ function: "IndexedDB.writeTableData", err });
+        }
+    }
+}
+
+export default IndexedDB;

@@ -1,48 +1,44 @@
 import { ItemData } from "../types";
 import http from "../axios";
+import { API_MAIN_TEMPERATURE_PATH } from "../constants";
 
 class TemperatureService {
-  constructor() {}
+  constructor() { }
 
-  getAll = () => {
-    return http.get<any>("/weather-service-archive/temperature");
+  getAll = (offset: number, limit: number) => {
+    return http.get<any>(`/${API_MAIN_TEMPERATURE_PATH}?offset=${offset}&limit=${limit}`);
   }
 
   getOne = (id: string) => {
-    return http.get<any>(`/weather-service-archive/temperature/${id}`);
+    return http.get<any>(`/${API_MAIN_TEMPERATURE_PATH}/${id}`);
   }
 
   create = (data: ItemData[]) => {
-    return http.post<any>("/weather-service-archive/temperature", data);
+    return http.post<any>(`/${API_MAIN_TEMPERATURE_PATH}`, data);
   }
 
   update = (id: string, data: ItemData) => {
-    return http.put<any>(`/weather-service-archive/temperature/${id}`, data);
+    return http.put<any>(`/${API_MAIN_TEMPERATURE_PATH}/${id}`, data);
   }
 
   deleteT = (id: string) => {
-    return http.delete<any>(`/weather-service-archive/temperature/${id}`);
+    return http.delete<any>(`/${API_MAIN_TEMPERATURE_PATH}/${id}`);
   }
 
   deleteAll = () => {
-    return http.delete<any>(`/weather-service-archive/temperature`);
+    return http.delete<any>(`/${API_MAIN_TEMPERATURE_PATH}`);
   }
 
-  filter = (filters:any) => {
+  filter = (filters: any) => {
     const filtersStrArr: any = [];
-    if (filters?.fromDate) {
-      filtersStrArr.push(`fromDate=${filters?.fromDate}`);
+
+    let k: keyof typeof filters;
+    for (k in filters) {
+      const v = filters[k];
+      filtersStrArr.push(`${k}=${v}`);
     }
-    if (filters?.toDate) {
-      filtersStrArr.push(`toDate=${filters?.fromDate}`);
-    }
-    if (filters?.fromTemperature) {
-      filtersStrArr.push(`fromTemperature=${filters?.fromTemperature}`);
-    }
-    if (filters?.toTemperature) {
-      filtersStrArr.push(`toTemperature=${filters?.toTemperature}`);
-    }
-    const url = `/weather-service-archive/temperature${filtersStrArr.length > 0 ? `?${filtersStrArr.join("&")}` : ""}`;
+
+    const url = `/${API_MAIN_TEMPERATURE_PATH}${filtersStrArr.length > 0 ? `?${filtersStrArr.join("&")}` : ""}`;
     return http.get<any>(url);
   }
 }

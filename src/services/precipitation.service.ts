@@ -1,48 +1,44 @@
 import { ItemData } from "../types";
 import http from "../axios";
+import { API_MAIN_PRECIPITATION_PATH } from "../constants";
 
 class PrecipitationService {
-  constructor() {}
+  constructor() { }
 
-  getAll = () => {
-    return http.get<any>("/weather-service-archive/precipitation");
+  getAll = (offset: number, limit: number) => {
+    return http.get<any>(`/${API_MAIN_PRECIPITATION_PATH}?offset=${offset}&limit=${limit}`);
   }
 
   getOne = (id: string) => {
-    return http.get<any>(`/weather-service-archive/precipitation/${id}`);
+    return http.get<any>(`/${API_MAIN_PRECIPITATION_PATH}/${id}`);
   }
 
   create = (data: ItemData[]) => {
-    return http.post<any>("/weather-service-archive/precipitation", data);
+    return http.post<any>(`/${API_MAIN_PRECIPITATION_PATH}`, data);
   }
 
   update = (id: string, data: ItemData) => {
-    return http.put<any>(`/weather-service-archive/precipitation/${id}`, data);
+    return http.put<any>(`/${API_MAIN_PRECIPITATION_PATH}/${id}`, data);
   }
 
   deleteP = (id: string) => {
-    return http.delete<any>(`/weather-service-archive/precipitation/${id}`);
+    return http.delete<any>(`/${API_MAIN_PRECIPITATION_PATH}/${id}`);
   }
 
   deleteAll = () => {
-    return http.delete<any>(`/weather-service-archive/precipitation`);
+    return http.delete<any>(`/${API_MAIN_PRECIPITATION_PATH}`);
   }
 
-  filter = (filters:any) => {
+  filter = (filters: any) => {
     const filtersStrArr: any = [];
-    if (filters?.fromDate) {
-      filtersStrArr.push(`fromDate=${filters?.fromDate}`);
+    
+    let k: keyof typeof filters;
+    for (k in filters) {
+      const v = filters[k];
+      filtersStrArr.push(`${k}=${v}`);
     }
-    if (filters?.toDate) {
-      filtersStrArr.push(`toDate=${filters?.fromDate}`);
-    }
-    if (filters?.fromPrecipitation) {
-      filtersStrArr.push(`fromPrecipitation=${filters?.fromPrecipitation}`);
-    }
-    if (filters?.toPrecipitation) {
-      filtersStrArr.push(`toPrecipitation=${filters?.toPrecipitation}`);
-    }
-    const url = `/weather-service-archive/precipitation${filtersStrArr.length > 0 ? `?${filtersStrArr.join("&")}` : ""}`;
+
+    const url = `/${API_MAIN_PRECIPITATION_PATH}${filtersStrArr.length > 0 ? `?${filtersStrArr.join("&")}` : ""}`;
     return http.get<any>(url);
   }
 }

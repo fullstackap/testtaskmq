@@ -6,9 +6,11 @@ import Select from 'react-select'
 import { Button, Col, Row } from 'antd';
 import 'antd/dist/antd.css'
 import CanvasWrapper from './components/CanvasWrapper';
-import { initiateDB, readTableData, writeTableData } from './indexedDB';
 import { PRECIPITATION, PRECIPITATION_TABLE, TEMPERATURE, TEMPERATURE_TABLE } from './constants';
 import useStateWithCallback from './useStateWithCallback';
+import IndexedDB from './indexedDB';
+
+const indexedDBSvc = new IndexedDB();
 
 const getMenuOptions = (label = "Select Year", uniqueYears: any) => [
     { label, value: "" },
@@ -18,7 +20,7 @@ const getMenuOptions = (label = "Select Year", uniqueYears: any) => [
             value,
         }))];
 
-function App() {
+const App = () => {
     const [db, setDB] = useState<IDBDatabase>();
     const [dbRequest, setDBRequest] = useState<any>();
     const [isInitiatingDB, setIsInitiatingDB] = useState(false);
@@ -35,19 +37,11 @@ function App() {
     const [dataArr, setDataArr] = useStateWithCallback([]);
     const [uniqueYears, setUniqueYears] = useState<any>([]);
 
-    const [hasCheckedForTemperatureData, setHasCheckedForTemperatureData] = useState(false);
-    const [hasCheckedForPrecipitation, setHasCheckedForPrecipitation] = useState(false);
-
     const [isLoadingTemperature, setIsLoadingTemperature] = useState(false);
     const [isLoadingPrecipitation, setIsLoadingPrecipitation] = useState(false);
 
-    const [isWritingTemperature, setIsWritingTemperature] = useState(false);
-    const [isWritingPrecipitation, setIsWritingPrecipitation] = useState(false);
-
     const temperatureButtonRef = useRef<HTMLButtonElement>(null);
     const precipitationButtonRef = useRef<HTMLButtonElement>(null);
-
-    
 
     const handleDisplayData = (displayDataP: any, dataArrP: any, selectedMinYearP: any, selectedMaxYearP: any) => {
         try {
@@ -115,9 +109,8 @@ function App() {
 
             setTemperature(data);
 
-            if (displayData === TEMPERATURE) {
-                handleDisplayData(displayData, data, selectedMinYear, selectedMaxYear);
-            }
+            handleDisplayData(TEMPERATURE, data, selectedMinYear, selectedMaxYear);
+
         } catch (err) {
             console.error({ function: "setTemperatureWrapper", err });
         }
@@ -130,11 +123,10 @@ function App() {
             if (!data?.length) {
                 return;
             }
+
             setPrecipitation(data);
 
-            if (displayData === PRECIPITATION) {
-                handleDisplayData(displayData, data, selectedMinYear, selectedMaxYear);
-            }
+            handleDisplayData(PRECIPITATION, data, selectedMinYear, selectedMaxYear);
         } catch (err) {
             console.error({ function: "setPrecipitationWrapper", err });
         }
@@ -147,12 +139,11 @@ function App() {
             setDB(dbP);
             setDBRequest(dbRequest);
 
-            // check if data present in indexedDB and if so set the corresponding data state tables
-            setHasCheckedForTemperatureData(true);
-            readTableData(dbP, TEMPERATURE_TABLE, setTemperatureWrapper, setIsLoadingTemperature);
+            // read temperature data from indexedDB and if so set the corresponding data state tables
+            indexedDBSvc.readTableData(dbP, TEMPERATURE_TABLE, setTemperatureWrapper, setIsLoadingTemperature);
 
-            setHasCheckedForPrecipitation(true);
-            readTableData(dbP, PRECIPITATION_TABLE, setPrecipitationWrapper, setIsLoadingPrecipitation);
+            // read precipitation data from indexedDB and if so set the corresponding data state tables
+            indexedDBSvc.readTableData(dbP, PRECIPITATION_TABLE, setPrecipitationWrapper, setIsLoadingPrecipitation);
         } catch (err) {
             console.error({ function: "setDBWrapper", err });
         }
@@ -161,27 +152,8 @@ function App() {
     // get indexedDB object
     useEffect(() => {
         if (!db && !dbRequest && !isInitiatingDB) {
-            initiateDB(setDBWrapper, setIsInitiatingDB);
+            indexedDBSvc.initiateDB(setDBWrapper, setIsInitiatingDB);
         }
-    }, []);
-
-    // if graph data is not present in indexedDB, load it and write from local files, and then read to initiate the graph
-    useEffect(() => {
-        (async () => {
-            const isTemperaturePendingRetrieval = db && dbRequest && !isInitiatingDB && (!temperature || temperature.length == 0) && hasCheckedForTemperatureData && !isWritingTemperature && !isLoadingTemperature;
-            if (isTemperaturePendingRetrieval) {
-                const temperatureT = await getData<ItemData>('../data/temperature.json');
-                writeTableData(db, TEMPERATURE_TABLE, temperatureT, setIsWritingTemperature);
-                readTableData(db, TEMPERATURE_TABLE, setTemperature, setIsLoadingTemperature);
-            }
-
-            const isPrecipitationPendingRetrieval = db && dbRequest && !isInitiatingDB && (!precipitation || precipitation.length == 0) && hasCheckedForPrecipitation && !isWritingPrecipitation && !isLoadingPrecipitation;
-            if (isPrecipitationPendingRetrieval) {
-                const precipitationT = await getData<ItemData>('../data/precipitation.json');
-                writeTableData(db, PRECIPITATION_TABLE, precipitationT, setIsWritingPrecipitation);
-                readTableData(db, PRECIPITATION_TABLE, setPrecipitation, setIsLoadingPrecipitation);
-            }
-        })();
     }, []);
 
     const isLoading = isLoadingTemperature || isLoadingPrecipitation;
