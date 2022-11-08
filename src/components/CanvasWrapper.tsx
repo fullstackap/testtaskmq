@@ -89,8 +89,10 @@ const CanvasWrapper = ({ dataArr, yAxisName }: any) => {
 
                 const groundZero = (minValue < 0 ? GRAPH_HEIGHT_EXT / 2 : GRAPH_HEIGHT_EXT);
 
-                // draw 1st reference line and value
-                updateCtx(ctx, yAxisName, xCoord, GRAPH_HEIGHT_EXT, 0);
+                // draw 0 reference line and value
+                if (minValue >= 0) {
+                    updateCtx(ctx, yAxisName, xCoord, GRAPH_HEIGHT_EXT, 0);
+                }
 
                 // draw 1st reference line and value
                 const firstYCoordMax = groundZero * (3 / 4);
