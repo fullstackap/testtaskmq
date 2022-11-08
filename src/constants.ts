@@ -25,4 +25,4 @@ export const API_URL = "http://localhost:8080/api"
 export const API_MAIN_PATH = "weather-archive-service";
 export const API_MAIN_TEMPERATURE_PATH = `${API_MAIN_PATH}/temperature`;
 export const API_MAIN_PRECIPITATION_PATH = `${API_MAIN_PATH}/precipitation`;
-export const LIMIT_RECORDS = 1000;
+export const LIMIT_RECORDS = 50000;
