@@ -23,8 +23,7 @@ const getMenuOptions = (label = "Select Year", uniqueYears: any) => [
 const App = () => {
     const [db, setDB] = useState<IDBDatabase>();
     const [dbRequest, setDBRequest] = useState<any>();
-    const [isInitiatingDB, setIsInitiatingDB] = useState(false);
-    const [isInitiatingDBTables, setIsInitiatingDBTables] = useState(false);
+    const [isInitiatingDB, setIsInitiatingDB] = useStateWithCallback(false);
 
     const [temperature, setTemperature] = useState<ItemData[]>([]);
     const [precipitation, setPrecipitation] = useState<ItemData[]>([]);
@@ -150,9 +149,8 @@ const App = () => {
 
     // get indexedDB object
     useEffect(() => {
-        if (!db && !dbRequest && !isInitiatingDB && !isInitiatingDBTables) {
-            console.error("@useEffect: setDBWrapper")
-            indexedDBSvc.initiateDB(displayData, setDBWrapper, setIsInitiatingDB, setIsInitiatingDBTables);
+        if (!db && !dbRequest && !isInitiatingDB) {
+            indexedDBSvc.initiateDB(displayData, setDBWrapper, setIsInitiatingDB);
         }
     }, []);
 
@@ -203,7 +201,7 @@ const App = () => {
                         <div>
                             {!isLoading && dataArr.length > 0 ?
                                 <CanvasWrapper dataArr={dataArr} yAxisName={displayData} /> :
-                                < div style={{ margin: "auto", width: "100px", }}><h1>График</h1></div>
+                                < div style={{ margin: "300px auto", width: "100px" }}><h1>График</h1></div>
                             }
                         </div>
                     </div>

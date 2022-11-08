@@ -32,26 +32,22 @@ class IndexedDB {
     }
 
     // initiateDB creates a db connection to indexedDB and creates collections if not already present
-    initiateDB(displayDataP: any, setDBWrapper: any, setIsInitiatingDB: any, setIsInitiatingDBTables: any) {
+    initiateDB(displayDataP: any, setDBWrapper: any, setIsInitiatingDB: any) {
         try {
             setIsInitiatingDB(true);
-            setIsInitiatingDBTables(true);
 
-            const request = window.indexedDB.open(DB, 2);
+            const request = window.indexedDB.open(DB, 1);
 
             request.onerror = (event: any) => {
-                console.error("failed to initiate indexedDB");
+                console.error("failed to initiate indexedDB", event);
             }
 
             request.onsuccess = (event: any) => {
                 const dbT = request.result;
-                setDBWrapper(displayDataP, dbT, request);
-                setIsInitiatingDB(false);
+                if (dbT.objectStoreNames.contains(TEMPERATURE_TABLE) || dbT.objectStoreNames.contains(PRECIPITATION_TABLE)) {
 
-                if (!dbT.objectStoreNames.contains(TEMPERATURE_TABLE) || !dbT.objectStoreNames.contains(PRECIPITATION_TABLE)) {
-                    setIsInitiatingDBTables(true);
-                } else {
-                    setIsInitiatingDBTables(false);
+                    setIsInitiatingDB(false);
+                    setDBWrapper(displayDataP, dbT, request);
                 }
             }
 
@@ -59,7 +55,9 @@ class IndexedDB {
                 var db = event.target.result;
                 this.createTableWrapper(db, TEMPERATURE_TABLE);
                 this.createTableWrapper(db, PRECIPITATION_TABLE);
-                setIsInitiatingDBTables(false);
+
+                setIsInitiatingDB(false);
+                setDBWrapper(displayDataP, db, request);
             }
         } catch (err) {
             console.error({ function: "IndexedDB.initiateDB", err });
@@ -81,7 +79,6 @@ class IndexedDB {
             };
 
             request.onsuccess = async (event: any) => {
-                console.error("@onsuccess")
                 let dataT = event?.target?.result;
 
                 // REQUIRMENT: при отсутствии данных в таблице, данные для нее запрашиваются с сервера

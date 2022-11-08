@@ -9,7 +9,7 @@ export const GRAPH_WIDTH = 768;
 export const GRAPH_HEIGHT = 540;
 
 export const CANVAS_WIDTH = 800;
-export const CANVAS_HEIGHT = 600;
+export const CANVAS_HEIGHT = 630;
 
 // database
 export const DB = "weather_service_archive";
